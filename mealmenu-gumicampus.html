@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>구미캠퍼스 식단정보</title>
+<style>
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --text: #1d2330;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-soft: #e8efff;
+  --border: #e3e6ec;
+  --chip: #f1f3f7;
+  --special: #fff4e5;
+  --special-text: #b45309;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1218;
+    --surface: #181c25;
+    --text: #e6e9ef;
+    --muted: #8b93a3;
+    --accent: #6ea8ff;
+    --accent-soft: #1d2a44;
+    --border: #262c38;
+    --chip: #222835;
+    --special: #3a2a14;
+    --special-text: #fbbf24;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1218;
+  --surface: #181c25;
+  --text: #e6e9ef;
+  --muted: #8b93a3;
+  --accent: #6ea8ff;
+  --accent-soft: #1d2a44;
+  --border: #262c38;
+  --chip: #222835;
+  --special: #3a2a14;
+  --special-text: #fbbf24;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+}
+.wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 40px; }
+header h1 { font-size: 1.35rem; margin: 0 0 4px; }
+header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+.notice {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.times {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+.time {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.time strong { display: block; font-size: 0.9rem; }
+.time span { font-size: 0.78rem; color: var(--muted); }
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 18px;
+}
+.tab {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 0;
+  font: inherit;
+  cursor: pointer;
+  position: relative;
+}
+.tab .day { font-weight: 700; font-size: 1rem; }
+.tab .date { display: block; font-size: 0.72rem; color: var(--muted); }
+.tab[aria-selected="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.tab[aria-selected="true"] .date { color: rgba(255,255,255,0.85); }
+.tab.today::after {
+  content: "";
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.tab[aria-selected="true"].today::after { background: #fff; }
+
+.meals { margin-top: 14px; display: grid; gap: 12px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.card-head h2 { font-size: 1.05rem; margin: 0; }
+.card-head small { color: var(--muted); font-size: 0.78rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  background: var(--chip);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 0.9rem;
+}
+.chip.special {
+  background: var(--special);
+  color: var(--special-text);
+  font-weight: 600;
+}
+.empty {
+  text-align: center;
+  padding: 36px 16px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+}
+
+footer {
+  margin-top: 24px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+footer a { color: var(--muted); }
+
+@media (max-width: 480px) {
+  .tab .day { font-size: 0.92rem; }
+  .chip { font-size: 0.85rem; padding: 4px 9px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>구미캠퍼스 식단정보</h1>
+    <p>한국폴리텍대학 구미캠퍼스 · 이번 주 식단</p>
+  </header>
+
+  <div class="notice">※ 식당 운영 및 식자재 수급 상황에 따라 메뉴가 변경될 수 있습니다.</div>
+
+  <div class="times">
+    <div class="time"><strong>아침</strong><span>07:50 ~ 08:40</span></div>
+    <div class="time"><strong>점심</strong><span>11:50 ~ 13:10</span></div>
+    <div class="time"><strong>저녁</strong><span>16:50 ~ 17:40<br>(수업 학생 월~목 18시까지)</span></div>
+  </div>
+
+  <div class="tabs" role="tablist" id="tabs"></div>
+
+  <div class="meals" id="meals"></div>
+
+  <footer>
+    출처: <a href="https://www.kopo.ac.kr/gumi/content.do?menu=4941" target="_blank" rel="noopener">한국폴리텍대학 구미캠퍼스 식단정보</a>
+  </footer>
+</div>
+
+<script>
+const MENU = [
+  { day: "월", date: "10/19", breakfast: ["컵밥", "음료"],
+    lunch: ["잡곡밥", "콩나물국", "치즈닭갈비", "맛감자/케찹", "쌈무", "포기김치"],
+    dinner: ["*일품요리*", "스팸계란볶음밥", "유부장국", "소세지핫바/머스타드", "포기김치/요구르트", "츄로스"] },
+  { day: "화", date: "10/20", breakfast: ["소보로빵", "초코우유"],
+    lunch: ["잡곡밥", "짬뽕순두부찌개", "간장불고기", "감자전/초간장", "표고버섯볶음", "포기김치"],
+    dinner: ["쌀밥", "알탕", "모듬조림", "호박볶음", "볼아묵조림", "포기김치"] },
+  { day: "수", date: "10/21", breakfast: ["컵밥", "음료"],
+    lunch: ["잡곡밥", "청국장찌개", "고등어구이/와사비장", "매콤어묵볶음", "시금치무침", "포기김치"],
+    dinner: ["흰밥", "어묵국", "떡볶이", "모듬야채튀김/초간장", "순대/소금", "포기김치/쿨피스"] },
+  { day: "목", date: "10/22", breakfast: ["소보로빵", "초코우유"],
+    lunch: ["*일품요리*", "흰밥", "뼈해장국", "풋고추/쌈장", "양파무절임", "깍두기", "매실주스"],
+    dinner: ["쌀밥", "육개장", "치킨너겟/머스타드", "명엽채조림", "오이양파무침", "포기김치"] },
+  { day: "금", date: "10/23", breakfast: ["컵밥", "음료"],
+    lunch: ["잡곡밥", "돈김치찌개", "딥치즈계란찜", "청포묵김가루무침", "명태피무침", "포기김치"],
+    dinner: ["흰밥", "옹심이들깨배추국", "후랑크소세지볶음", "돌자반", "고구마순볶음", "포기김치"] }
+];
+
+const MEAL_LABELS = [
+  { key: "breakfast", label: "조식", time: "07:50 ~ 08:40" },
+  { key: "lunch", label: "중식", time: "11:50 ~ 13:10" },
+  { key: "dinner", label: "석식", time: "16:50 ~ 17:40" }
+];
+
+const tabsEl = document.getElementById("tabs");
+const mealsEl = document.getElementById("meals");
+
+// 오늘 요일 (월=0 ... 금=4), 주말이면 null
+function todayIndex() {
+  const d = new Date().getDay(); // 0=일 ... 6=토
+  return d >= 1 && d <= 5 ? d - 1 : null;
+}
+
+function renderTabs(selected) {
+  const today = todayIndex();
+  tabsEl.innerHTML = "";
+  MENU.forEach((m, i) => {
+    const btn = document.createElement("button");
+    btn.className = "tab" + (i === today ? " today" : "");
+    btn.setAttribute("role", "tab");
+    btn.setAttribute("aria-selected", i === selected ? "true" : "false");
+    btn.innerHTML = `<span class="day">${m.day}</span><span class="date">${m.date}</span>`;
+    btn.addEventListener("click", () => renderDay(i));
+    tabsEl.appendChild(btn);
+  });
+}
+
+function renderChips(items) {
+  return items.map(item => {
+    const isSpecial = item.includes("*일품요리*");
+    const text = isSpecial ? "일품요리" : item;
+    return `<span class="chip${isSpecial ? " special" : ""}">${escapeHtml(text)}</span>`;
+  }).join("");
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function renderDay(i) {
+  renderTabs(i);
+  const m = MENU[i];
+  const hasMenu = MEAL_LABELS.some(meal => m[meal.key] && m[meal.key].length);
+  if (!hasMenu) {
+    mealsEl.innerHTML = `<div class="empty">등록된 식단이 없습니다.</div>`;
+    return;
+  }
+  mealsEl.innerHTML = MEAL_LABELS.map(meal => {
+    const items = m[meal.key] || [];
+    const body = items.length
+      ? `<div class="chips">${renderChips(items)}</div>`
+      : `<div class="empty">운영 안내 없음</div>`;
+    return `
+      <section class="card">
+        <div class="card-head">
+          <h2>${meal.label}</h2>
+          <small>${meal.time}</small>
+        </div>
+        ${body}
+      </section>`;
+  }).join("");
+}
+
+const startIndex = todayIndex() ?? 0;
+renderDay(startIndex);
+</script>
+</body>
+</html>
