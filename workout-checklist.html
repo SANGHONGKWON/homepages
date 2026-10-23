@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>운동 체크리스트</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-2: #273549;
+    --cyan: #22d3ee;
+    --lime: #a3e635;
+    --orange: #fb923c;
+    --pink: #f472b6;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    background: radial-gradient(circle at top, #1e1b4b 0%, var(--bg) 60%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 20px 16px 48px; }
+
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 10px; }
+  h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+  h1 span { background: linear-gradient(90deg, var(--cyan), var(--lime)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .date {
+    background: var(--card); color: var(--text); border: 1px solid #334155;
+    border-radius: 12px; padding: 8px 10px; font-size: 14px; font-family: inherit;
+  }
+
+  .card { background: var(--card); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+  .card-title { font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 10px; letter-spacing: .5px; }
+
+  .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px; border-radius: 16px; background: var(--card-2); margin-bottom: 10px; gap: 12px;
+  }
+  .row:last-child { margin-bottom: 0; }
+  .info b { display: block; font-size: 17px; font-weight: 700; }
+  .info small { color: var(--muted); font-size: 12px; }
+
+  /* 체크박스 */
+  .cb {
+    width: 34px; height: 34px; accent-color: var(--lime); cursor: pointer; flex-shrink: 0;
+  }
+
+  /* 스테퍼 */
+  .stepper { display: flex; align-items: center; gap: 8px; }
+  .stepper button {
+    width: 48px; height: 48px; border: none; border-radius: 14px;
+    font-size: 26px; font-weight: 700; color: #0f172a; cursor: pointer;
+    transition: transform .08s;
+  }
+  .stepper button:active { transform: scale(.92); }
+  .stepper .minus { background: #475569; color: var(--text); }
+  .stepper .plus.run { background: var(--cyan); }
+  .stepper .plus.push { background: var(--orange); }
+  .value { min-width: 78px; text-align: center; }
+  .value output { font-size: 26px; font-weight: 800; display: block; line-height: 1; }
+  .value span { font-size: 12px; color: var(--muted); }
+
+  /* 월 네비 */
+  .monthnav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .monthnav b { font-size: 18px; }
+  .monthnav button {
+    width: 40px; height: 40px; border: none; border-radius: 12px; background: var(--card-2);
+    color: var(--text); font-size: 22px; cursor: pointer;
+  }
+
+  /* 요약 */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .stat { background: var(--card-2); border-radius: 16px; padding: 14px; }
+  .stat small { color: var(--muted); font-size: 12px; }
+  .stat b { display: block; font-size: 22px; margin-top: 4px; }
+  .stat.c b { color: var(--cyan); }
+  .stat.l b { color: var(--lime); }
+  .stat.o b { color: var(--orange); }
+  .stat.p b { color: var(--pink); }
+
+  h3 { font-size: 15px; margin: 6px 0 10px; font-weight: 700; }
+  .chartbox { position: relative; width: 100%; height: 200px; margin-bottom: 22px; }
+  .chartbox.short { height: 170px; margin-bottom: 0; }
+  .chartbox canvas { width: 100% !important; height: 100% !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>💪 오늘의 <span>운동</span></h1>
+    <input type="date" id="dateInput" class="date" aria-label="기록할 날짜">
+  </header>
+
+  <!-- 오늘(선택한 날짜) 체크리스트 -->
+  <section class="card">
+    <div class="card-title">오늘의 기록</div>
+
+    <div class="row">
+      <div class="info"><b>🏊 수영</b><small>했으면 체크</small></div>
+      <input type="checkbox" class="cb" id="swim" aria-label="수영">
+    </div>
+
+    <div class="row">
+      <div class="info"><b>🏃 달리기</b><small>1km 단위</small></div>
+      <div class="stepper">
+        <button class="minus" data-act="run-" aria-label="달리기 1km 감소">−</button>
+        <div class="value"><output id="runVal">0</output><span>km</span></div>
+        <button class="plus run" data-act="run+" aria-label="달리기 1km 증가">+</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="info"><b>💪 푸시업</b><small>10개 단위</small></div>
+      <div class="stepper">
+        <button class="minus" data-act="push-" aria-label="푸시업 10개 감소">−</button>
+        <div class="value"><output id="pushVal">0</output><span>개</span></div>
+        <button class="plus push" data-act="push+" aria-label="푸시업 10개 증가">+</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="info"><b>🧗 매달리기</b><small>했으면 체크</small></div>
+      <input type="checkbox" class="cb" id="hang" aria-label="매달리기">
+    </div>
+  </section>
+
+  <!-- 월별 통계 & 그래프 -->
+  <section class="card">
+    <div class="monthnav">
+      <button id="prev" aria-label="이전 달">‹</button>
+      <b id="monthLabel"></b>
+      <button id="next" aria-label="다음 달">›</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat c"><small>🏊 수영</small><b id="sSwim">0일</b></div>
+      <div class="stat p"><small>🧗 매달리기</small><b id="sHang">0일</b></div>
+      <div class="stat l"><small>🏃 총 달리기</small><b id="sRun">0km</b></div>
+      <div class="stat o"><small>💪 총 푸시업</small><b id="sPush">0개</b></div>
+    </div>
+
+    <h3>🏃 달리기 (km)</h3>
+    <div class="chartbox"><canvas id="runChart"></canvas></div>
+
+    <h3>💪 푸시업 (개)</h3>
+    <div class="chartbox"><canvas id="pushChart"></canvas></div>
+
+    <h3>📅 이번 달 며칠 했나</h3>
+    <div class="chartbox short"><canvas id="countChart"></canvas></div>
+  </section>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+  const KEY = 'workout-checklist-v1';
+  let db = {};
+  try { db = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { db = {}; }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  }
+
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2, '0');
+  const keyOf = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+
+  const now = new Date();
+  let selected = keyOf(now.getFullYear(), now.getMonth(), now.getDate());
+  let viewY = now.getFullYear();
+  let viewM = now.getMonth();
+
+  function rec(k) {
+    return db[k] || { swim: false, run: 0, push: 0, hang: false };
+  }
+
+  function setRec(k, patch) {
+    db[k] = { ...rec(k), ...patch };
+    save();
+    renderAll();
+  }
+
+  /* ---------- 그래프 준비 ---------- */
+  const axisColor = '#94a3b8';
+  function baseOptions(max) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 10 } },
+      scales: {
+        x: { ticks: { color: axisColor, font: { size: 10 }, maxRotation: 0, autoSkip: true }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { color: axisColor, precision: 0 }, grid: { color: 'rgba(148,163,184,.15)' } }
+      }
+    };
+  }
+
+  function makeChart(id, color, labelText) {
+    return new Chart($(id), {
+      type: 'bar',
+      data: { labels: [], datasets: [{ label: labelText, data: [], backgroundColor: color, borderRadius: 6, maxBarThickness: 18 }] },
+      options: baseOptions()
+    });
+  }
+
+  const runChart = makeChart('runChart', '#22d3ee', 'km');
+  const pushChart = makeChart('pushChart', '#fb923c', '개');
+  const countChart = new Chart($('countChart'), {
+    type: 'bar',
+    data: {
+      labels: ['수영', '매달리기'],
+      datasets: [{ data: [0, 0], backgroundColor: ['#a3e635', '#f472b6'], borderRadius: 8, maxBarThickness: 60 }]
+    },
+    options: baseOptions()
+  });
+
+  /* ---------- 렌더링 ---------- */
+  function renderToday() {
+    const r = rec(selected);
+    $('dateInput').value = selected;
+    $('swim').checked = !!r.swim;
+    $('hang').checked = !!r.hang;
+    $('runVal').textContent = r.run;
+    $('pushVal').textContent = r.push;
+  }
+
+  function renderMonth() {
+    const days = new Date(viewY, viewM + 1, 0).getDate();
+    const labels = [];
+    const runData = [];
+    const pushData = [];
+    let swimDays = 0, hangDays = 0, totalRun = 0, totalPush = 0;
+
+    for (let d = 1; d <= days; d++) {
+      const r = rec(keyOf(viewY, viewM, d));
+      labels.push(d);
+      runData.push(r.run);
+      pushData.push(r.push);
+      if (r.swim) swimDays++;
+      if (r.hang) hangDays++;
+      totalRun += r.run;
+      totalPush += r.push;
+    }
+
+    $('monthLabel').textContent = `${viewY}년 ${viewM + 1}월`;
+    $('sSwim').textContent = `${swimDays}일`;
+    $('sHang').textContent = `${hangDays}일`;
+    $('sRun').textContent = `${totalRun}km`;
+    $('sPush').textContent = `${totalPush}개`;
+
+    runChart.data.labels = labels;
+    runChart.data.datasets[0].data = runData;
+    runChart.update();
+
+    pushChart.data.labels = labels;
+    pushChart.data.datasets[0].data = pushData;
+    pushChart.update();
+
+    countChart.data.datasets[0].data = [swimDays, hangDays];
+    countChart.update();
+  }
+
+  function renderAll() {
+    renderToday();
+    renderMonth();
+  }
+
+  /* ---------- 이벤트 ---------- */
+  $('swim').addEventListener('change', e => setRec(selected, { swim: e.target.checked }));
+  $('hang').addEventListener('change', e => setRec(selected, { hang: e.target.checked }));
+
+  document.querySelectorAll('[data-act]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const act = btn.dataset.act;
+      const r = rec(selected);
+      if (act === 'run+') setRec(selected, { run: r.run + 1 });
+      if (act === 'run-') setRec(selected, { run: Math.max(0, r.run - 1) });
+      if (act === 'push+') setRec(selected, { push: r.push + 10 });
+      if (act === 'push-') setRec(selected, { push: Math.max(0, r.push - 10) });
+    });
+  });
+
+  $('dateInput').addEventListener('change', e => {
+    if (!e.target.value) return;
+    selected = e.target.value;
+    const [y, m] = selected.split('-').map(Number);
+    viewY = y;
+    viewM = m - 1;
+    renderAll();
+  });
+
+  $('prev').addEventListener('click', () => {
+    viewM--;
+    if (viewM < 0) { viewM = 11; viewY--; }
+    renderMonth();
+  });
+
+  $('next').addEventListener('click', () => {
+    viewM++;
+    if (viewM > 11) { viewM = 0; viewY++; }
+    renderMonth();
+  });
+
+  renderAll();
+</script>
+</body>
+</html>
